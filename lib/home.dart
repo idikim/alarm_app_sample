@@ -1,4 +1,6 @@
+import 'package:alarm_app_sample/alarm_write_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -102,7 +104,9 @@ class Home extends StatelessWidget {
         ),
         actions: [
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Get.to(AlarmWritePage());
+            },
             child: Padding(
               padding: const EdgeInsets.only(right: 15),
               child: Image.asset('assets/images/icon_add.png'),
