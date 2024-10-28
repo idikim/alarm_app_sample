@@ -1,3 +1,4 @@
+import 'package:alarm_app_sample/alarm_controller.dart';
 import 'package:alarm_app_sample/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.put(AlarmController(), permanent: true);
     return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

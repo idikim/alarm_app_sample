@@ -1,3 +1,5 @@
+import 'package:alarm_app_sample/alarm_controller.dart';
+import 'package:alarm_app_sample/alarm_model.dart';
 import 'package:alarm_app_sample/alarm_write_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,40 +48,64 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _etcAlarm() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-      decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xff262629)))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _etcAlarm(AlarmModel alarm, bool isEditMode) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(AlarmWritePage(alarm: alarm));
+      },
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+          if (isEditMode)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: GestureDetector(
+                onTap: () {
+                  Get.find<AlarmController>().removeAlarm(alarm.id);
+                },
+                child: Icon(Icons.remove_circle, color: Colors.red),
+              ),
+            ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Color(0xff262629)))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('오전',
-                      style: TextStyle(fontSize: 25, color: Color(0xff8d8d93))),
-                  SizedBox(width: 10),
-                  Text('4:00',
-                      style: TextStyle(
-                          fontSize: 60,
-                          color: Color(0xff8d8d93),
-                          height: 1,
-                          letterSpacing: -3))
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(alarm.hour < 12 ? '오전' : '오후',
+                              style: TextStyle(
+                                  fontSize: 25, color: Color(0xff8d8d93))),
+                          SizedBox(width: 10),
+                          Text(
+                              '${alarm.hour.toString().padLeft(2, '0')}:${alarm.minute.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                  fontSize: 60,
+                                  color: Color(0xff8d8d93),
+                                  height: 1,
+                                  letterSpacing: -3))
+                        ],
+                      ),
+                      Switch(
+                        onChanged: (value) {
+                          print(value);
+                        },
+                        value: alarm.isOn,
+                      ),
+                    ],
+                  ),
+                  Text('알람',
+                      style: TextStyle(fontSize: 18, color: Color(0xff8d8d93))),
                 ],
               ),
-              Switch(
-                onChanged: (value) {
-                  print(value);
-                },
-                value: false,
-              ),
-            ],
+            ),
           ),
-          Text('알람', style: TextStyle(fontSize: 18, color: Color(0xff8d8d93))),
         ],
       ),
     );
@@ -91,14 +117,19 @@ class Home extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: GestureDetector(
-          onTap: () {},
+          onTap: Get.find<AlarmController>().toggleEditMode,
           child: Center(
-            child: Text(
-              '편집',
-              style: TextStyle(
-                color: Color(0xffff9f0a),
-                fontSize: 20,
-              ),
+            child: GetBuilder<AlarmController>(
+              builder: (controller) {
+                return Text(
+                  controller.isEditMode ? '완료' : '편집',
+                  style: TextStyle(
+                    color:
+                        controller.isEditMode ? Color(0xffff9f0a) : Colors.red,
+                    fontSize: 20,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -127,7 +158,21 @@ class Home extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-            ...List.generate(5, (index) => _etcAlarm()),
+            GetBuilder<AlarmController>(builder: (controller) {
+              if (controller.alarmList.isEmpty) {
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  child: Text('등록된 알람이 없습니다.',
+                      style: TextStyle(fontSize: 18, color: Color(0xff8d8d93))),
+                );
+              }
+              return Column(
+                children: controller.alarmList.map((alarm) {
+                  return _etcAlarm(alarm, controller.isEditMode);
+                }).toList(),
+              );
+            })
           ],
         ),
       ),
